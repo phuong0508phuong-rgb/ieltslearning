@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IELTS LEARNING - Tutor Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', system-ui, sans-serif; }
+        .nav-link { transition: all 0.3s; }
+        .nav-link.active { background-color: #4f46e5; color: white; }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1); }
+        .modal { animation: modalPop 0.3s ease; }
+        @keyframes modalPop { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+<div class="flex h-screen">
+    <!-- Sidebar -->
+    <div class="w-64 bg-white border-r border-gray-200 flex flex-col">
+        <div class="p-6 border-b">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-2xl">📚</div>
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">IELTS LEARNING</h1>
+                    <p class="text-xs text-gray-500">1:1 Tutoring</p>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="flex-1 p-4 space-y-1">
+            <a href="#" onclick="navigateTo('dashboard')" class="nav-link active flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gray-100" id="nav-dashboard">
+                <i class="fas fa-home w-5"></i><span>Dashboard</span>
+            </a>
+            <a href="#" onclick="navigateTo('students')" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gray-100" id="nav-students">
+                <i class="fas fa-users w-5"></i><span>Học viên</span>
+            </a>
+            <a href="#" onclick="navigateTo('schedule')" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gray-100" id="nav-schedule">
+                <i class="fas fa-calendar-alt w-5"></i><span>Lịch học</span>
+            </a>
+            <a href="#" onclick="navigateTo('lessons')" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gray-100" id="nav-lessons">
+                <i class="fas fa-book w-5"></i><span>Buổi học</span>
+            </a>
+            <a href="#" onclick="navigateTo('homework')" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gray-100" id="nav-homework">
+                <i class="fas fa-tasks w-5"></i><span>Bài tập</span>
+            </a>
+            <a href="#" onclick="navigateTo('exams')" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gray-100" id="nav-exams">
+                <i class="fas fa-clipboard-list w-5"></i><span>Thi thử</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <header class="bg-white border-b px-8 py-5 flex justify-between items-center">
+            <h2 class="text-3xl font-semibold text-gray-800" id="page-title">Dashboard</h2>
+            <button onclick="addNewStudent()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-2xl flex items-center gap-2 font-medium">
+                <i class="fas fa-plus"></i> Thêm học viên
+            </button>
+        </header>
+
+        <div class="flex-1 overflow-auto p-8" id="main-content">
+            <!-- Các tab sẽ được hiển thị động -->
+            <div id="dashboard-content">...</div>
+            <div id="students-content" class="hidden">...</div>
+            <div id="schedule-content" class="hidden">...</div>
+            <div id="lessons-content" class="hidden">...</div>
+            <div id="homework-content" class="hidden">...</div>
+            <div id="exams-content" class="hidden">...</div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div id="modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+    <div class="bg-white rounded-3xl max-w-lg w-full mx-4 modal" id="modal-content"></div>
+</div>
+
+<script>
+// ==================== DATA & LOCALSTORAGE ====================
+let students = JSON.parse(localStorage.getItem('students')) || [];
+let lessons = JSON.parse(localStorage.getItem('lessons')) || [];
+let homework = JSON.parse(localStorage.getItem('homework')) || [];
+let exams = JSON.parse(localStorage.getItem('exams')) || [];
+let schedules = JSON.parse(localStorage.getItem('schedules')) || [];
+
+function saveData() {
+    localStorage.setItem('students', JSON.stringify(students));
+    localStorage.setItem('lessons', JSON.stringify(lessons));
+    localStorage.setItem('homework', JSON.stringify(homework));
+    localStorage.setItem('exams', JSON.stringify(exams));
+    localStorage.setItem('schedules', JSON.stringify(schedules));
+}
+
+// Navigation
+function navigateTo(page) {
+    document.querySelectorAll('#main-content > div').forEach(div => div.classList.add('hidden'));
+    const content = document.getElementById(page + '-content');
+    content.classList.remove('hidden');
+
+    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+    document.getElementById('nav-' + page).classList.add('active');
+
+    document.getElementById('page-title').textContent = {
+        dashboard: 'Dashboard',
+        students: 'Học viên',
+        schedule: 'Lịch học',
+        lessons: 'Buổi học',
+        homework: 'Bài tập',
+        exams: 'Thi thử'
+    }[page];
+
+    if (page === 'students') renderStudents();
+    if (page === 'homework') renderHomework();
+    if (page === 'lessons') renderLessons();
+    if (page === 'exams') renderExams();
+    if (page === 'schedule') renderSchedules();
+}
+
+// Render functions (rút gọn để file ngắn hơn, bạn có thể mở rộng)
+function renderStudents() { /* ... */ console.log("Students rendered"); }
+function renderHomework() { /* ... */ }
+function renderLessons() { /* ... */ }
+function renderExams() { /* ... */ }
+function renderSchedules() { /* ... */ }
+
+// Upload file thật
+function submitHomework(index) {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.onchange = e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+            homework[index].fileData = ev.target.result;
+            homework[index].fileName = file.name;
+            homework[index].status = "Submitted";
+            saveData();
+            renderHomework();
+            alert(`✅ Nộp thành công: ${file.name}`);
+        };
+        reader.readAsDataURL(file);
+    };
+    input.click();
+}
+
+// Khởi tạo
+function init() {
+    navigateTo('dashboard');
+    // Thêm dữ liệu mẫu nếu chưa có
+    if (students.length === 0) {
+        students = [{id:1, name:"Maria Lopez", targetBand:"7.5", email:"maria@example.com"}];
+        saveData();
+    }
+}
+
+window.onload = init;
+</script>
+</body>
+</html>
